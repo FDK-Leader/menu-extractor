@@ -30,44 +30,38 @@ def check_password():
         return True
 
 if check_password():
-    st.title("📊 실메뉴 추출기 (최근 3개월)")
-    st.write("어느 곳에서든 매장의 DB 정보만 입력하면 데이터를 추출할 수 있습니다.")
+    st.title("📊 실메뉴 추출기 (내 PC 전용)")
+    st.write("내 PC에 설치된 DB에서 데이터를 바로 추출합니다.")
 
     # ==========================================
-    # 2. DB 접속 정보 수기 입력 화면
+    # 2. DB 접속 정보 (비밀번호만 입력)
     # ==========================================
     st.divider()
-    st.subheader("🔗 데이터베이스 접속 정보 입력")
+    st.subheader("🔗 데이터베이스 접속")
     
-    st.markdown("매장 PC의 외부 접속용 아이피를 모를 경우 아래 링크를 눌러 확인하세요.")
-    st.markdown("[**👉 매장 PC 공인 IP 확인하기 (클릭)**](https://search.naver.com/search.naver?query=내아이피)", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        input_host = st.text_input("1. DB 주소 (공인 IP)", placeholder="예: 123.45.67.89")
-        # 🔥 포트 번호 기본값을 17838로 변경했습니다!
-        input_port = st.text_input("2. 포트 번호 (PORT)", value="17838") 
-    with col2:
-        input_user = st.text_input("3. DB 아이디 (ID)", placeholder="예: root")
-        input_pass = st.text_input("4. DB 비밀번호 (PW)", type="password")
+    # 🔥 나머지 정보는 코드 내부에 숨겨서 고정합니다!
+    fixed_host = "127.0.0.1"
+    fixed_port = 17838
+    fixed_user = "root"
+
+    # 화면에는 오직 비밀번호 칸만 보여줍니다.
+    input_pass = st.text_input("DB 비밀번호를 입력해 주세요 (PW)", type="password")
 
     st.divider()
 
     # ==========================================
     # 3. 데이터 조회 버튼 및 실행 로직
     # ==========================================
-    if st.button("🚀 위 정보로 DB 연결 및 데이터 조회하기"):
-        if not input_host or not input_port or not input_user or not input_pass:
-            st.warning("아이피, 포트, 아이디, 비밀번호를 모두 입력해 주세요!")
+    if st.button("🚀 데이터 조회하기"):
+        if not input_pass:
+            st.warning("비밀번호를 입력해 주세요!")
         else:
             try:
-                port_num = int(input_port)
-
-                # DB 이름은 k_db로 고정
+                # 고정된 정보와 화면에서 입력받은 비밀번호를 합쳐서 연결합니다.
                 conn = pymysql.connect(
-                    host=input_host, 
-                    port=port_num,
-                    user=input_user, 
+                    host=fixed_host, 
+                    port=fixed_port,
+                    user=fixed_user, 
                     password=input_pass, 
                     db="k_db", 
                     charset='utf8'
@@ -113,4 +107,4 @@ if check_password():
 
             except Exception as e:
                 st.error("데이터베이스 접속에 실패했습니다.")
-                st.error(f"원인: 아이피/비밀번호가 틀렸거나, 매장 공유기의 '포트포워딩'이 안 되어 있을 수 있습니다. (상세오류: {e})")
+                st.error(f"원인: DB가 실행 중이 아니거나 비밀번호가 틀렸습니다. (상세오류: {e})")
